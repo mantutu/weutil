@@ -56,6 +56,58 @@ function isFunction(val) {
 }
 
 /**
+ * 遍历函数
+ *
+ * @param {*} obj
+ * @param {*} fn
+ * @returns
+ */
+function forEach(obj, fn) {
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  if (typeof obj !== 'object') {
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * 合并多个对象
+ *
+ * @returns
+ */
+function merge( /* obj1, obj2, obj3, ... */ ) {
+  let result = {};
+
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (let i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+
+  return result;
+}
+
+/**
  * 删除字符串开始及结束处空格
  * @param {String} str
  */
@@ -72,7 +124,7 @@ function decodeQuery(query) {
   if (query.scene) {
     qs = decodeURIComponent(query.scene);
   } else if (query.q) {
-    let [, qs] = decodeURIComponent(query.q).split("?");
+    [, qs] = decodeURIComponent(query.q).split("?");
   } else {
     return query;
   }
@@ -133,6 +185,8 @@ module.exports = {
   isBlob,
   isFunction,
   trim,
+  forEach,
+  merge,
   decodeQuery,
   encodeQuery,
   getCurrentPageUrl,
