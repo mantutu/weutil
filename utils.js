@@ -56,8 +56,28 @@ function isFunction(val) {
 }
 
 /**
+ * 判断URL是否为绝对地址
+ * @param {*} url
+ * @returns
+ */
+function isAbsoluteURL(url) {
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+/**
+ * 生成URL
+ * @param {*} baseURL
+ * @param {*} relativeURL
+ * @returns
+ */
+function combineURLs(baseURL, relativeURL) {
+  return relativeURL ?
+    baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') :
+    baseURL;
+};
+
+/**
  * 遍历函数
- *
  * @param {*} obj
  * @param {*} fn
  * @returns
@@ -86,7 +106,6 @@ function forEach(obj, fn) {
 
 /**
  * 合并多个对象
- *
  * @returns
  */
 function merge( /* obj1, obj2, obj3, ... */ ) {
@@ -106,6 +125,26 @@ function merge( /* obj1, obj2, obj3, ... */ ) {
 
   return result;
 }
+
+/**
+ * 合并config
+ * @param {*} config1
+ * @param {*} config2
+ */
+function mergeConfig(config1, config2) {
+  config2 = config2 || {};
+  var config = {};
+
+  forEach(['url', 'method', 'params', 'data', 'headers', 'baseURL'], function defaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  return config;
+};
 
 /**
  * 删除字符串开始及结束处空格
@@ -184,9 +223,12 @@ module.exports = {
   isFile,
   isBlob,
   isFunction,
-  trim,
+  isAbsoluteURL,
+  combineURLs,
   forEach,
   merge,
+  mergeConfig,
+  trim,
   decodeQuery,
   encodeQuery,
   getCurrentPageUrl,
